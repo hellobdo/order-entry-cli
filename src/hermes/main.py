@@ -6,7 +6,7 @@ from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.trading.client import TradingClient
 from alpaca.trading.stream import TradingStream
 from dotenv import load_dotenv
-from prompt_toolkit.shortcuts import prompt
+from prompt_toolkit.shortcuts import PromptSession, prompt
 
 from .context import TradingContext
 from .info_methods import get_open_orders, get_open_positions
@@ -34,18 +34,27 @@ def get_trading_mode():
 def get_risk_pct():
     risk_pct_input = prompt("Risk Percentage (default: 0.25%).\n> ")
     risk_pct = float(risk_pct_input or "0.25") / 100
-    print(f"Risk Percentage for the session is {risk_pct * 100}%")
+    print(f"Risk Percentage for the session is {round(risk_pct * 100, 2)}%")
     return risk_pct
 
 
-async def main():
-    load_dotenv()
-
-    is_paper = get_trading_mode()
-    risk_pct = get_risk_pct()
+def get_risk_reward():
     risk_reward_input = prompt("Risk/Reward Ratio. (default: 5).\n> ")
     risk_reward = float(risk_reward_input or "5")
     print(f"Risk Reward for the session is {risk_reward}")
+    return risk_reward
+
+
+def setup_session():
+    is_paper = get_trading_mode()
+    risk_pct = get_risk_pct()
+    risk_reward = get_risk_reward()
+
+    return is_paper, risk_pct, risk_reward
+
+
+async def main(is_paper, risk_pct, risk_reward):
+    load_dotenv()
 
     api_key = (
         os.environ["ALPACA_API_KEY_PAPER"]
@@ -61,8 +70,12 @@ async def main():
     client = TradingClient(api_key, secret_key, paper=is_paper, raw_data=False)
     stock_data = StockHistoricalDataClient(api_key, secret_key)
 
-    account_value = float(client.get_account().last_equity or 0)
-    print(f"Account value for risk calculations today is {account_value}")
+    account = client.get_account()
+    account_value = float(account.last_equity or 0)
+    account_currency = account.currency
+    print(
+        f"Account value for risk calculations today is {account_currency} {account_value:,.2f}"
+    )
 
     ctx = TradingContext(
         client=client,
@@ -76,11 +89,22 @@ async def main():
     asyncio.create_task(start_stream(api_key, secret_key, is_paper))
 
     print(
-        f"Creating session...\n Risk Percentage: {risk_pct} \n Risk Reward: {risk_reward} \n Account Value: {account_value}"
+        f"""Creating session...
+        Trading Mode: {is_paper}
+        Risk Percentage: {risk_pct * 100}%
+        Risk Reward: {risk_reward}
+        Account Value: {account_value}
+        Methods:
+            * <orders> to get open orders
+            * <positions> to get open positions
+            * <AAPL buy 123> to buy AAPL with stop loss 123
+            * <AAPL sell 123> to short AAPL with stop loss 123
+        """
     )
 
+    session = PromptSession()
     while True:
-        input = prompt("> ")
+        input = await session.prompt_async("> ")
 
         if input == "orders":
             print(get_open_orders(ctx))
@@ -95,5 +119,10 @@ async def main():
             handle_order_entry(ctx, side, stop_loss_price, symbol)
 
 
+def cli():
+    is_paper, risk_pct, risk_reward = setup_session()
+    asyncio.run(main(is_paper, risk_pct, risk_reward))
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    cli()

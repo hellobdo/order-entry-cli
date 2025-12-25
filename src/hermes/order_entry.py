@@ -25,7 +25,7 @@ def get_side_object(side: str) -> OrderSide:
 
 
 def get_quote(ctx: TradingContext, symbol: str) -> Quote:
-    return ctx.stock_data.get_latest_quote(
+    return ctx.stock_data.get_stock_latest_quote(
         StockLatestQuoteRequest(symbol_or_symbols=symbol)
     )[symbol]
 
@@ -56,8 +56,8 @@ def handle_order_entry(
             symbol, qty, side, take_profit_price, stop_loss_price
         )
         ctx.client.submit_order(order)
-    except ValueError:
-        raise ValueError("Error submitting order")
+    except Exception as e:
+        print(f"Error submitting order: {e}")
 
 
 def create_bracket_order(
