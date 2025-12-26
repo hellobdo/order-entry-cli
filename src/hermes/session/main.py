@@ -15,4 +15,5 @@ def get_trading_context() -> TradingContext:
         is_paper=is_paper,
         account_value=account_value,
         risk_reward=risk_reward,
+        risk_amount=risk_pct * account_value,
     )

@@ -1,7 +1,6 @@
 import questionary
 from prompt_toolkit.shortcuts import prompt
 
-
 def get_trading_mode():
     return (
         questionary.select("Select trading mode:", choices=["Paper", "Live"]).ask()

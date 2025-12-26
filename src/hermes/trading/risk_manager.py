@@ -1,8 +1,8 @@
 from hermes.context import TradingContext
 
 
-def define_risk_amount(ctx: TradingContext) -> float:
-    return ctx.risk_pct * ctx.account_value
+def set_qty(entry_price: float, stop_loss_price: float, risk_amount: float):
+    return round(risk_amount / abs(entry_price - stop_loss_price))
 
 
 def define_take_profit_price(

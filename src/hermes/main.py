@@ -3,7 +3,7 @@ import asyncio
 from prompt_toolkit.shortcuts import PromptSession
 
 from hermes.session.alpaca import start_stream
-from hermes.session.helpers import check_orders, select_order
+from hermes.session.helpers import parsing_options
 from hermes.session.main import get_trading_context
 from hermes.trading.order_entry import handle_order_entry
 
@@ -18,13 +18,11 @@ async def main(ctx):
         Risk Reward: {ctx.risk_reward}
         Account Value: {ctx.account_value}
         Methods:
-            * <orders> to get open orders
-            * <positions> to get open positions
-            * <cancel order> to cancel a specific order
-            * <cancel all orders> to cancel all open orders
+            * <orders> lists all standing orders
+            * <positions> lists all positions
             * <AAPL buy 123> to buy AAPL with stop loss 123
             * <AAPL sell 123> to short AAPL with stop loss 123
-            * <modify order> to modify an existing order
+            * <chain AAPL> to list option expiries and create an option order
             * <exit> to leave
         """
     )
@@ -39,21 +37,19 @@ async def main(ctx):
         elif input == "positions":
             positions = ctx.client.get_all_positions()
             print(f"{positions}") if positions else print("No standing orders")
-        elif input == "cancel order":
-            orders = check_orders(ctx)
-            if not orders:
-                print("No open orders")
-                continue
-            order_id = select_order(orders)
-            ctx.client.cancel_order_by_id(order_id)
-        elif input == "cancel all orders":
-            ctx.client.cancel_orders()
-            orders = ctx.client.get_orders()
-            if not orders:
-                print("No open orders")
-                continue
         elif input == "exit":
             break
+        elif "chain" in input:
+            symbol, strike, option_type, stop_price, option_symbol = parsing_options(
+                ctx, input
+            )
+
+            print(f"\nSubmitting order for {symbol} Strike {strike} {option_type}")
+
+            handle_order_entry(
+                ctx, side="buy", stop_loss_price=stop_price, symbol=option_symbol
+            )
+
         else:
             symbol, side, stop_loss = input.split()
             if side.lower() not in ["buy", "sell"]:
