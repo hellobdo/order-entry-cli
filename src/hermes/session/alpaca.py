@@ -1,10 +1,14 @@
+import csv
 import os
+from datetime import datetime
 from typing import Tuple
 
 from alpaca.data.historical import OptionHistoricalDataClient, StockHistoricalDataClient
 from alpaca.trading.client import TradingClient
 from alpaca.trading.stream import TradingStream
 from dotenv import load_dotenv
+
+from hermes.context import TradingContext
 
 
 def _get_api_keys(is_paper) -> Tuple:
@@ -45,10 +49,10 @@ def get_account_value(client: TradingClient) -> Tuple:
     return account_value, account_currency
 
 
-async def start_stream(is_paper: bool) -> None:
-    api_key, secret_key = _get_api_keys(is_paper)
+async def start_stream(ctx: TradingContext) -> None:
+    api_key, secret_key = _get_api_keys(ctx.is_paper)
 
-    trading_stream = TradingStream(api_key, secret_key, paper=is_paper)
+    trading_stream = TradingStream(api_key, secret_key, paper=ctx.is_paper)
 
     async def update_handler(data):
         order = data.order
@@ -64,6 +68,10 @@ async def start_stream(is_paper: bool) -> None:
 
         if data.event == "fill":
             print("Order filled! Use 'modify order' to adjust quantity")
+            with open("order_fills.csv", "a", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow([datetime.now(), str(data.__dict__)])
+            # ctx.duckdb.log_trades(data)
 
         if order.filled_avg_price:
             print(f"   Filled Price: ${order.filled_avg_price}")

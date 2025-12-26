@@ -35,7 +35,7 @@ async def main(ctx):
     )
 
     with patch_stdout():
-        background_task = asyncio.create_task(start_stream(ctx.is_paper))
+        background_task = asyncio.create_task(start_stream(ctx))
         session = PromptSession()
 
         try:
