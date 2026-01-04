@@ -1,4 +1,4 @@
-from hermes.trading.risk_manager import set_qty
+from trading_order_entries.trading.risk_manager import set_qty
 
 
 # Stock tests

@@ -1,6 +1,6 @@
 from alpaca.trading.enums import OrderSide
 
-from hermes.trading.orders.utils import get_entry_side_object
+from trading_order_entries.trading.orders.utils import get_entry_side_object
 
 
 def test_get_side_buy():

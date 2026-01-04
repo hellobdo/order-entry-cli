@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
-from hermes.context import TradingContext
-from hermes.trading.risk_manager import define_take_profit_price
+from trading_order_entries.context import TradingContext
+from trading_order_entries.trading.risk_manager import define_take_profit_price
 
 
 def test_take_profit_buy():
