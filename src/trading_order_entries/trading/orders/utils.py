@@ -1,7 +1,6 @@
 from typing import Tuple
 
-from alpaca.data.models import Quote
-from alpaca.data.requests import StockLatestQuoteRequest
+from alpaca.data.requests import StockLatestTradeRequest
 from alpaca.trading.enums import (
     OrderSide,
 )
@@ -26,16 +25,12 @@ def get_exit_side_object(side: str) -> OrderSide:
     return OrderSide.SELL if side == "buy" else OrderSide.BUY
 
 
-def get_quote(ctx: TradingContext, symbol: str) -> Quote:
-    return ctx.stock_data.get_stock_latest_quote(
-        StockLatestQuoteRequest(symbol_or_symbols=symbol)
+def get_latest_price(ctx: TradingContext, symbol: str) -> float:
+    trade = ctx.stock_data.get_stock_latest_trade(
+        StockLatestTradeRequest(symbol_or_symbols=symbol)
     )[symbol]
 
-
-def get_latest_price(ctx: TradingContext, symbol: str, side: str) -> float:
-    quote = get_quote(ctx, symbol)
-
-    return quote.ask_price if side == "buy" else quote.bid_price
+    return trade.price
 
 
 def get_qty_split(qty: int) -> Tuple:

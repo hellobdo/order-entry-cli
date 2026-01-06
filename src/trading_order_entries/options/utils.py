@@ -1,15 +1,18 @@
 from typing import List
 
 import questionary
-from alpaca.data.requests import OptionLatestQuoteRequest
 from alpaca.trading.enums import ContractType
 from alpaca.trading.requests import GetOptionContractsRequest
 
 from trading_order_entries.trading.orders.utils import get_latest_price
 
 
-def get_option_contract_request(symbol) -> GetOptionContractsRequest:
-    return GetOptionContractsRequest(underlying_symbols=[f"{symbol}"])
+def get_option_contract_request(
+    symbol: str, contract_type: ContractType
+) -> GetOptionContractsRequest:
+    return GetOptionContractsRequest(
+        underlying_symbols=[f"{symbol}"], type=contract_type
+    )
 
 
 def get_symbol_from_input(input) -> str:
@@ -21,7 +24,7 @@ def get_closest_strike(strikes: List[float], underlying_price: float) -> float:
 
 
 async def get_strike(ctx, underlying_symbol, strikes: List[float]) -> float:
-    underlying_price = get_latest_price(ctx, underlying_symbol, side="buy")
+    underlying_price = get_latest_price(ctx, underlying_symbol)
     closest_strike = get_closest_strike(strikes, underlying_price)
 
     return await questionary.select(
@@ -39,7 +42,3 @@ async def get_selected_date(dates: List) -> str:
 
 def get_contract_type_enum(option_type) -> ContractType:
     return ContractType.CALL if option_type == "Call" else ContractType.PUT
-
-
-def generate_option_request(option_symbol) -> OptionLatestQuoteRequest:
-    return OptionLatestQuoteRequest(symbol_or_symbols=option_symbol)

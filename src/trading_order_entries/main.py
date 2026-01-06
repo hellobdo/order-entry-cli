@@ -98,7 +98,7 @@ async def main(ctx):
                     elif len(input.split()) == 1:
                         try:
                             symbol = input.upper()
-                            entry_price = get_latest_price(ctx, symbol, side="buy")
+                            entry_price = get_latest_price(ctx, symbol)
                             print(f"Entry price is {entry_price}")
                         except Exception as e:
                             error_data = json.loads(str(e))

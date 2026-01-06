@@ -86,11 +86,15 @@ def handle_order_entry(
     is_options: bool,
 ):
     try:
-        entry_price = get_latest_price(ctx, symbol, side)
+        entry_price = get_latest_price(ctx, symbol)
         print(f"Entry price is {entry_price}")
         validate_orders(side, entry_price, stop_loss_price)
         side = get_entry_side_object(side)
+        print(
+            f"Risk amount: {ctx.risk_amount}, Entry: {entry_price}, Stop: {stop_loss_price}"
+        )
         qty = set_qty(entry_price, stop_loss_price, ctx.risk_amount, is_options)
+        print(f"Calculated qty: {qty}")
         take_profit_price = define_take_profit_price(
             ctx, entry_price, stop_loss_price, side
         )
