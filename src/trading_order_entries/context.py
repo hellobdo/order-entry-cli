@@ -15,7 +15,7 @@ class TradingContext:
     db: DuckDBConnector
     risk_pct: float
     is_paper: bool
-    account_id: int
+    account_id: int | None
     account_nr: str
     account_value: float
     account_currency: str

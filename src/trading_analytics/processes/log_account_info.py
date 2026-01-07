@@ -5,12 +5,22 @@ import polars as pl
 from trading_order_entries.context import TradingContext
 
 
+def get_account_id(ctx: TradingContext) -> int:
+    db_accounts = ctx.db.get_account_ids()
+    account_id = (
+        db_accounts.filter(pl.col("account_number") == ctx.account_nr)
+        .select("id")
+        .item()
+    )
+    return account_id
+
+
 def prepare_account_info(ctx: TradingContext) -> pl.DataFrame:
     return pl.DataFrame(
         {
             "account_number": ctx.account_nr,
             "currency": ctx.account_currency,
-            "type": "Paper" if ctx.is_paper else "Live",
+            "type": "paper" if ctx.is_paper else "live",
         }
     )
 
@@ -29,13 +39,14 @@ def log_account_info(ctx: TradingContext):
     print("Preparing account info")
     account_info_df = prepare_account_info(ctx)
 
-    print("Preparing account snapshots info")
-    account_snapshot_df = prepare_snapshots(ctx)
-
     print("Logging account info")
     ctx.db.log_account_info(account_info_df)
     print("Account info inserted!")
 
+
+def log_account_snapshots(ctx: TradingContext):
+    print("Preparing account snapshots info")
+    account_snapshot_df = prepare_snapshots(ctx)
     print("Preparing snapshots")
     ctx.db.log_account_snapshots(account_snapshot_df)
     print("Account snapshots inserted!")
