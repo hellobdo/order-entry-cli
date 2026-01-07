@@ -1,6 +1,9 @@
 import json
 
+from alpaca.trading.enums import TimeInForce
+
 from trading_order_entries.context import TradingContext
+from trading_order_entries.db.utils import handle_inserting_stop_orders
 from trading_order_entries.trading.orders.orders import (
     create_entry_order,
     create_limit_order,
@@ -40,6 +43,8 @@ def handle_exit_orders_commons(
     ctx.client.submit_order(order_partial_fills_one)
     ctx.client.submit_order(order_remaining_stop)
 
+    handle_inserting_stop_orders(ctx, order_remaining_stop)
+
 
 def handle_exit_orders_options(
     ctx: TradingContext,
@@ -51,11 +56,17 @@ def handle_exit_orders_options(
 ) -> None:
     side = get_exit_side_object(side)
 
-    order_limit = create_limit_order(symbol, qty, side, take_profit_price)
-    order_stop = create_stop_order(symbol, qty, side, stop_loss_price)
+    order_limit = create_limit_order(
+        symbol, qty, side, take_profit_price, TimeInForce.DAY
+    )
+    order_stop = create_stop_order(symbol, qty, side, stop_loss_price, TimeInForce.DAY)
 
     ctx.client.submit_order(order_limit)
-    ctx.client.submit_order(order_stop)
+    order_stop_submitted = ctx.client.submit_order(order_stop)
+
+    handle_inserting_stop_orders(
+        ctx, order_stop_submitted
+    )  # can ignore error raw_data is set as False in initiation
 
 
 def handle_exit_orders(

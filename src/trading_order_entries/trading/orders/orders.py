@@ -49,13 +49,14 @@ def create_limit_order(
     qty: int,
     side: OrderSide,
     take_profit_price: float,
+    time_in_force: TimeInForce=TimeInForce.GTC
 ) -> LimitOrderRequest:
     return LimitOrderRequest(
         symbol=symbol,
         qty=qty,
         side=side,
         type=OrderType.LIMIT,
-        time_in_force=TimeInForce.GTC,
+        time_in_force=time_in_force,
         take_profit=TakeProfitRequest(limit_price=take_profit_price),
     )
 
@@ -65,11 +66,12 @@ def create_stop_order(
     qty: int,
     side: OrderSide,
     stop_loss_price: float,
+    time_in_force: TimeInForce=TimeInForce.GTC
 ) -> StopOrderRequest:
     return StopOrderRequest(
         symbol=symbol,
         qty=qty,
         side=side,
-        time_in_force=TimeInForce.GTC,
+        time_in_force=time_in_force,
         stop_price=stop_loss_price,
     )
