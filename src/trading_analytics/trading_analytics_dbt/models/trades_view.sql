@@ -38,7 +38,7 @@ select
     so.stop_price,
     exit.avg_exit_price as exit_price,
     ta.date_closed,
-    acc_snap.last_equity as account_size,
+    acc_snap.equity as account_size,
     ta.total_qty * entry.avg_entry_price as capital_required,
     datediff('day', ta.date_opened, ta.date_closed) as duration_days,
     abs(entry.avg_entry_price - so.stop_price) * ta.total_qty as risk_size,

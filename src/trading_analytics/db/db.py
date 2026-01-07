@@ -120,10 +120,10 @@ class DuckDBConnector:
             """
             INSERT INTO account_snapshots (
                 account_id,
-                last_equity,
+                equity,
                 date
             )
-            SELECT account_id, last_equity, date
+            SELECT account_id, equity, date
             FROM df
             ON CONFLICT (account_id, date) DO NOTHING
             """

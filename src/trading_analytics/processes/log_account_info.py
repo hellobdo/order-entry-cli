@@ -29,7 +29,7 @@ def prepare_snapshots(ctx: TradingContext) -> pl.DataFrame:
     return pl.DataFrame(
         {
             "account_id": ctx.account_id,
-            "last_equity": ctx.account_value,
+            "equity": ctx.account_value,
             "date": datetime.now().date(),
         }
     )

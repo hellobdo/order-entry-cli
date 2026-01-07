@@ -102,7 +102,7 @@ def setup_database():
         conn.execute("""
             CREATE TABLE IF NOT EXISTS account_snapshots (
                 account_id INTEGER,
-                last_equity DOUBLE,
+                equity DOUBLE,
                 date DATE,
                 PRIMARY KEY (account_id, date),
                 FOREIGN KEY (account_id) REFERENCES accounts(id)

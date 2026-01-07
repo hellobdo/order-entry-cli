@@ -46,7 +46,7 @@ def get_alpaca_clients(is_paper: bool, raw_data: bool = False) -> Tuple:
 
 def get_account_value(client: TradingClient) -> Tuple:
     account = client.get_account()
-    account_value = float(account.last_equity or 0)
+    account_value = float(account.equity or 0)
     account_currency = account.currency
     account_nr = account.account_number
 

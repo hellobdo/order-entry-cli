@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from typing import List
 
 import questionary
@@ -6,10 +7,16 @@ from alpaca.trading.requests import GetOptionContractsRequest
 
 
 def get_option_contract_request(
-    symbol: str, contract_type: ContractType
+    symbol: str, contract_type: ContractType, underlying_price: float
 ) -> GetOptionContractsRequest:
     return GetOptionContractsRequest(
-        underlying_symbols=[f"{symbol}"], type=contract_type
+        underlying_symbols=[f"{symbol}"],
+        type=contract_type,
+        expiration_date_gte=date.today(),
+        expiration_date_lte=date.today() + timedelta(days=14),
+        strike_price_gte=str(underlying_price * 0.95),
+        strike_price_lte=str(underlying_price * 1.05),
+        limit=50,
     )
 
 
@@ -21,8 +28,7 @@ def get_closest_strike(strikes: List[float], underlying_price: float) -> float:
     return min(strikes, key=lambda x: abs(x - underlying_price))
 
 
-async def get_strike(strikes: List[float]) -> float:
-    underlying_price = await get_underlying_price()
+async def get_strike(strikes: List[float], underlying_price: float) -> float:
     closest_strike = get_closest_strike(strikes, underlying_price)
 
     return await questionary.select(
