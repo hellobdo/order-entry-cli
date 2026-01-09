@@ -19,7 +19,12 @@ base_metrics as (
         qty * entry_price as capital_required,
         datediff('day', date_opened, date_closed) as duration_days,
         round(abs(entry_price - stop_price) * qty,2) as risk_size,
-        round((exit_price - entry_price) / abs(entry_price - stop_price),2) as risk_reward
+        round(
+            case
+                when side = 'bullish' then ((exit_price - entry_price) / (entry_price - stop_price))
+                when side = 'bearish' then ((entry_price - exit_price) / (stop_price - entry_price))
+            end
+        ,2) as risk_reward
 from closed_trades),
 
 calculated_metrics as (
